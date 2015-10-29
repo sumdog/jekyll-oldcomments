@@ -1,7 +1,7 @@
 jekyll-oldcomments
 ==================
 
-[![Gem](https://img.shields.io/gem/v/formatador.svg?style=plastic)]()
+[![Gem](https://img.shields.io/gem/v/jekyll-oldcomments.svg?style=plastic)]()
 
 Do you have an old wordpress blog? Are you migrating it to Jekyll? Tired of spam? Don't want to moderate comments anymore, but you don't want to lose all those comments of people who have contributed so far? 
 
