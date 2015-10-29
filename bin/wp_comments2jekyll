@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+require 'rexml/document'
+include REXML
+require 'uri'
+
+if not ARGV[0] or not File.exists?(ARGV[0]) 
+  puts('Usage: wp_comments2jekyll <wordpress-export.xml>')
+  exit(1)
+end
+
+xml = Document.new(File.new(ARGV[0]))
+comment_dir = '_comments'
+Dir.mkdir(comment_dir)
+
+XPath.each(xml,'//item') do |item|
+  c_map = Hash.new
+  c_map['title'] = item.elements['title'].text.tr(':','')
+  c_map['link'] = item.elements['link'].text
+  c_map['path'] = URI.parse(c_map['link']).path
+
+  item.elements.each('wp:comment') do |comment|
+    #print_field(comment, 'wp:comment_author_email')
+    for f in ['wp:comment_author_email','wp:comment_author','wp:comment_id','wp:comment_author_url','wp:comment_author_IP','wp:comment_date','wp:comment_date_gmt','wp:comment_content','wp:comment_approved']
+      ele = comment.elements[f]
+      if ele
+        c_map[f.split(':')[1]] = ele.text
+      end
+    end
+
+    if c_map['comment_approved'] == '1'
+      filename = "%d-%s-%s" % [c_map['comment_id'], c_map['comment_date'].split(' ')[0],  c_map['path'].gsub(/^\/|\/?$/,'').tr('/','_')]
+      fd = File.open(File.join(comment_dir, '%s.md' % filename),'w')
+      fd.write("---\n")
+      c_map.each do |key, value| 
+        if key != 'comment_content'
+          fd.write("%s: %s\n" % [key.gsub(/comment_/,''), value])
+        end
+      end
+      fd.write("---\n")
+      fd.write(c_map['comment_content'])
+      fd.close()
+    end
+
+  end
+end
